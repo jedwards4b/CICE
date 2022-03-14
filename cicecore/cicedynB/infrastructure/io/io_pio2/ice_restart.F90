@@ -139,6 +139,7 @@
       subroutine init_restart_write(filename_spec)
 
       use ice_calendar, only: msec, mmonth, mday, myear, istep1
+      use ice_constants, only: c0
       use ice_communicate, only: my_task, master_task
       use ice_domain_size, only: nx_global, ny_global, ncat, nilyr, nslyr, &
                                  n_iso, n_aero, nblyr, n_zaero, n_algae, n_doc,   &
@@ -228,6 +229,8 @@
          call ice_pio_init(mode='write',filename=trim(filename), File=File, &
               clobber=.true., cdf64=lcdf64, iotype=iotype)
 
+         status = pio_put_att(File,pio_global,'_FillValue',c0)
+         status = pio_put_att(File,pio_global,'missing_value',c0)
          status = pio_put_att(File,pio_global,'istep1',istep1)
 !         status = pio_put_att(File,pio_global,'time',time)
 !         status = pio_put_att(File,pio_global,'time_forc',time_forc)
@@ -729,10 +732,6 @@
 !         if (ndim3 == ncat .and. ncat>1) then
          if (ndim3 == ncat .and. ndims == 3) then
             call pio_read_darray(File, vardesc, iodesc3d_ncat, work, status)
-#ifndef CESM1_PIO
-!           This only works for PIO2
-            where (work == PIO_FILL_DOUBLE) work = c0
-#endif
             if (present(field_loc)) then
                do n=1,ndim3
                   call ice_HaloUpdate (work(:,:,n,:), halo_info, &
@@ -742,10 +741,6 @@
 !         elseif (ndim3 == 1) then
          elseif (ndim3 == 1 .and. ndims == 2) then
             call pio_read_darray(File, vardesc, iodesc2d, work, status)
-#ifndef CESM1_PIO
-!           This only works for PIO2
-            where (work == PIO_FILL_DOUBLE) work = c0
-#endif
             if (present(field_loc)) then
                call ice_HaloUpdate (work(:,:,1,:), halo_info, &
                                     field_loc, field_type)
