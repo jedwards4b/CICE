@@ -6,6 +6,7 @@
       module ice_restart
 
       use ice_broadcast
+      use ice_constants, only: c0
       use ice_exit, only: abort_ice
       use ice_fileunits, only: nu_diag, nu_restart, nu_rst_pointer
       use ice_kinds_mod
@@ -670,7 +671,7 @@
 
       use ice_blocks, only: nx_block, ny_block
       use ice_communicate, only: my_task, master_task
-      use ice_constants, only: c0, field_loc_center
+      use ice_constants, only: field_loc_center
       use ice_boundary, only: ice_HaloUpdate
       use ice_domain, only: halo_info, distrb_info, nblocks
       use ice_domain_size, only: max_blocks, ncat
@@ -729,10 +730,6 @@
 !         if (ndim3 == ncat .and. ncat>1) then
          if (ndim3 == ncat .and. ndims == 3) then
             call pio_read_darray(File, vardesc, iodesc3d_ncat, work, status)
-#ifndef CESM1_PIO
-!           This only works for PIO2
-            where (work == PIO_FILL_DOUBLE) work = c0
-#endif
             if (present(field_loc)) then
                do n=1,ndim3
                   call ice_HaloUpdate (work(:,:,n,:), halo_info, &
@@ -742,10 +739,6 @@
 !         elseif (ndim3 == 1) then
          elseif (ndim3 == 1 .and. ndims == 2) then
             call pio_read_darray(File, vardesc, iodesc2d, work, status)
-#ifndef CESM1_PIO
-!           This only works for PIO2
-            where (work == PIO_FILL_DOUBLE) work = c0
-#endif
             if (present(field_loc)) then
                call ice_HaloUpdate (work(:,:,1,:), halo_info, &
                                     field_loc, field_type)
@@ -792,7 +785,7 @@
 
       use ice_blocks, only: nx_block, ny_block
       use ice_communicate, only: my_task, master_task
-      use ice_constants, only: c0, field_loc_center
+      use ice_constants, only: field_loc_center
       use ice_domain, only: distrb_info, nblocks
       use ice_domain_size, only: max_blocks, ncat
       use ice_global_reductions, only: global_minval, global_maxval, global_sum
@@ -909,6 +902,8 @@
       character(len=*), parameter :: subname = '(define_rest_field)'
 
       status = pio_def_var(File,trim(vname),pio_double,dims,vardesc)
+      status = pio_put_att(File, vardesc, 'missing_value', c0)
+      status = pio_put_att(File, vardesc,'_FillValue',c0)
         
       end subroutine define_rest_field
 
