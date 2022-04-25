@@ -124,6 +124,7 @@
          write_ic       , & ! write initial condition now
          dump_last      , & ! write restart file on last time step
          force_restart_now, & ! force a restart now
+         hist_streamnum   , & ! Use stream number in history filename
          write_history(max_nstrm) ! write history now
 
       character (len=1), public :: &

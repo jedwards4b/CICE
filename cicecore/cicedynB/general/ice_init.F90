@@ -70,7 +70,7 @@
                               istep0, histfreq, histfreq_n, histfreq_base, &
                               dumpfreq, dumpfreq_n, diagfreq, dumpfreq_base, &
                               npt, dt, ndtd, days_per_year, use_leap_years, &
-                              write_ic, dump_last, npt_unit
+                              write_ic, dump_last, npt_unit, hist_streamnum
       use ice_arrays_column, only: oceanmixed_ice
       use ice_restart_column, only: restart_age, restart_FY, restart_lvl, &
           restart_pond_cesm, restart_pond_lvl, restart_pond_topo, restart_aero, &
@@ -175,7 +175,7 @@
         print_global,   print_points,   latpnt,          lonpnt,        &
         debug_forcing,  histfreq,       histfreq_n,      hist_avg,      &
         history_dir,    history_file,   history_precision, cpl_bgc,     &
-        histfreq_base,  dumpfreq_base,  timer_stats,                    &
+        histfreq_base,  dumpfreq_base,  hist_streamnum,  timer_stats,   &
         conserv_check,  debug_model,    debug_model_step,               &
         debug_model_i,  debug_model_j,  debug_model_iblk, debug_model_task, &
         year_init,      month_init,     day_init,        sec_init,      &

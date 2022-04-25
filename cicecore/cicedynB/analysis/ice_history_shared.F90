@@ -656,7 +656,7 @@
       use ice_calendar, only: msec, myear, mmonth, daymo,  &
                               mday, write_ic, histfreq, histfreq_n, &
                               new_year, new_month, new_day, &
-                              dt
+                              dt, hist_streamnum
       use ice_restart_shared, only: lenstr
 
       character (char_len_long), intent(inout) :: ncfile
@@ -696,9 +696,9 @@
            endif
 
            cstream = ''
-!echmod ! this was implemented for CESM but it breaks post-processing software
-!echmod ! of other groups (including RASM which uses CESMCOUPLED)
-!echmod         if (ns > 1) write(cstream,'(i1.1)') ns-1
+
+           if (hist_streamnum) &
+              if (ns > 1) write(cstream,'(i1.1)') ns-1
 
            if (hist_avg) then    ! write averaged data
               if (histfreq(ns) == '1' .and. histfreq_n(ns) == 1)  then ! timestep
