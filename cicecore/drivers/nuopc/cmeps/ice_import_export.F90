@@ -317,6 +317,8 @@ contains
     real(dbl_kind)              :: max_med2mod_areacor_glob
     real(dbl_kind)              :: min_mod2med_areacor_glob
     real(dbl_kind)              :: min_med2mod_areacor_glob
+    character(len=CL)           :: mesh_atm
+    character(len=CL)           :: mesh_ice
     character(len=*), parameter :: subname='(ice_import_export:realize_fields)'
     !---------------------------------------------------------------------------
 
