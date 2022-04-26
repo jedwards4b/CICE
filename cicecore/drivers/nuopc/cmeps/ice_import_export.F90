@@ -3,7 +3,7 @@ module ice_import_export
   use ESMF
   use NUOPC
   use NUOPC_Model
-  use ice_kinds_mod      , only : int_kind, dbl_kind, char_len, log_kind
+  use ice_kinds_mod      , only : int_kind, dbl_kind, char_len, char_len_long, log_kind
   use ice_constants      , only : c0, c1, spval_dbl, radius
   use ice_constants      , only : field_loc_center, field_type_scalar, field_type_vector
   use ice_blocks         , only : block, get_block, nx_block, ny_block
@@ -317,8 +317,8 @@ contains
     real(dbl_kind)              :: max_med2mod_areacor_glob
     real(dbl_kind)              :: min_mod2med_areacor_glob
     real(dbl_kind)              :: min_med2mod_areacor_glob
-    character(len=CL)           :: mesh_atm
-    character(len=CL)           :: mesh_ice
+    character(len=char_len_long):: mesh_atm
+    character(len=char_len_long):: mesh_ice
     character(len=*), parameter :: subname='(ice_import_export:realize_fields)'
     !---------------------------------------------------------------------------
 
