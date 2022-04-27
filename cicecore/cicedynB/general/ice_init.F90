@@ -309,6 +309,7 @@
       history_dir  = './'    ! write to executable dir for default
       history_file = 'iceh'  ! history file name prefix
       history_precision = 4  ! precision of history files
+      hist_streamnum = .false. ! Add stream number to history file name
       write_ic = .false.     ! write out initial condition
       cpl_bgc = .false.      ! couple bgc thru driver
       incond_dir = history_dir ! write to history dir for default
@@ -779,6 +780,7 @@
       call broadcast_scalar(history_file,         master_task)
       call broadcast_scalar(history_precision,    master_task)
       call broadcast_scalar(history_format,       master_task)
+      call broadcast_scalar(hist_streamnum,       master_task)
       call broadcast_scalar(write_ic,             master_task)
       call broadcast_scalar(cpl_bgc,              master_task)
       call broadcast_scalar(incond_dir,           master_task)
@@ -2025,6 +2027,7 @@
          write(nu_diag,1031) ' history_file     = ', trim(history_file)
          write(nu_diag,1021) ' history_precision= ', history_precision
          write(nu_diag,1031) ' history_format   = ', trim(history_format)
+         write(nu_diag,1011) ' hist_streamnum   = ', hist_streamnum
          if (write_ic) then
             write(nu_diag,1039) ' Initial condition will be written in ', &
                                trim(incond_dir)
