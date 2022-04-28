@@ -697,8 +697,9 @@
 
            cstream = ''
 
-           if (hist_streamnum) &
+           if (hist_streamnum) then
               if (ns > 1) write(cstream,'(i1.1)') ns-1
+           endif
 
            if (hist_avg) then    ! write averaged data
               if (histfreq(ns) == '1' .and. histfreq_n(ns) == 1)  then ! timestep

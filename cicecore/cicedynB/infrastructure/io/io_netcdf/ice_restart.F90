@@ -131,7 +131,6 @@
 
       use ice_blocks, only: nghost
       use ice_calendar, only: msec, mmonth, mday, myear, istep1
-      use ice_constants, only: c0
       use ice_communicate, only: my_task, master_task
       use ice_domain_size, only: nx_global, ny_global, ncat, nilyr, nslyr, &
                                  n_iso, n_aero, nblyr, n_zaero, n_algae, n_doc,   &
@@ -217,8 +216,6 @@
          if (status /= nf90_noerr) call abort_ice(subname// &
             'ERROR: creating restart ncfile '//trim(filename))
 
-         status = nf90_put_att(ncid,nf90_global,'_FillValue',c0)
-         status = nf90_put_att(ncid,nf90_global,'missing_value',c0)
          status = nf90_put_att(ncid,nf90_global,'istep1',istep1)
 !         status = nf90_put_att(ncid,nf90_global,'time',time)
 !         status = nf90_put_att(ncid,nf90_global,'time_forc',time_forc)
