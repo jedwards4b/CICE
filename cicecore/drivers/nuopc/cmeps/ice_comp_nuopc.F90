@@ -214,7 +214,6 @@ contains
     type(ESMF_Time)              :: stopTime           ! Stop time
     type(ESMF_Time)              :: refTime            ! Ref time
     type(ESMF_TimeInterval)      :: timeStep           ! Model timestep
-    type(ESMF_Calendar)          :: esmf_calendar      ! esmf calendar
     type(ESMF_CalKind_Flag)      :: esmf_caltype       ! esmf calendar type
     integer                      :: start_ymd          ! Start date (YYYYMMDD)
     integer                      :: start_tod          ! start time of day (s)
@@ -548,7 +547,6 @@ contains
 
        scol_valid = (scol_mask == 1)
        if (.not. scol_valid) then
-          write(6,*)'DEBUG: i am here'
           ! Advertise fields
           call ice_advertise_fields(gcomp, importState, exportState, flds_scalar_name, rc)
           if (ChkErr(rc,__LINE__,u_FILE_u)) return
