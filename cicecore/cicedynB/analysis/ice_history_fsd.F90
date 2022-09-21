@@ -81,8 +81,7 @@
       integer (kind=int_kind) :: nml_error ! namelist i/o error flag
       real    (kind=dbl_kind) :: secday
       logical (kind=log_kind) :: tr_fsd, wave_spec
-      character(len=char_len_long) :: tmpstr2 ! for namelist errors
-      
+
       character(len=*), parameter :: subname = '(init_hist_fsd_2D)'
 
       call icepack_query_tracer_flags(tr_fsd_out=tr_fsd)

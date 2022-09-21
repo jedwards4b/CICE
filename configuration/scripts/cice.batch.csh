@@ -91,7 +91,7 @@ cat >> ${jobfile} << EOFB
 #PBS -l walltime=${batchtime}
 EOFB
 
-else if (${ICE_MACHINE} =~ gordon* || ${ICE_MACHINE} =~ conrad*  || ${ICE_MACHINE} =~ gaffney* || ${ICE_MACHINE} =~ koehr* || ${ICE_MACHINE} =~ mustang) then
+else if (${ICE_MACHINE} =~ gaffney* || ${ICE_MACHINE} =~ koehr* || ${ICE_MACHINE} =~ mustang*) then
 cat >> ${jobfile} << EOFB
 #PBS -N ${shortcase}
 #PBS -q ${queue}
@@ -102,6 +102,40 @@ cat >> ${jobfile} << EOFB
 #PBS -W umask=022
 ###PBS -M username@domain.com
 ###PBS -m be
+EOFB
+
+else if (${ICE_MACHINE} =~ narwhal*) then
+if (${runlength} <= 0) then
+  set batchtime = "00:29:59"
+else
+  set queue = "standard"
+endif
+cat >> ${jobfile} << EOFB
+#PBS -N ${shortcase}
+#PBS -q ${queue}
+#PBS -A ${acct}
+#PBS -l select=${nnodes}:ncpus=${maxtpn}:mpiprocs=${taskpernode}
+#PBS -l walltime=${batchtime}
+#PBS -j oe
+#PBS -W umask=022
+###PBS -M username@domain.com
+###PBS -m be
+EOFB
+
+else if (${ICE_MACHINE} =~ nrlssc*) then
+# nrlssc queue system has nodes with different task per node
+if (${taskpernode} <= 12) set tpnstr = 'twelve'
+if (${taskpernode} == 20) set tpnstr = 'twenty'
+if (${taskpernode} == 24) set tpnstr = 'twentyfour'
+if (${taskpernode} == 28) set tpnstr = 'twentyeight'
+
+cat >> ${jobfile} <<EOFB
+#PBS -N ${shortcase}
+#PBS -q ${queue}
+#PBS -l nodes=${nnodes}:ppn=${taskpernode}:${tpnstr}
+#PBS -l walltime=${batchtime}
+#PBS -j oe
+#PBS -W umask=022
 EOFB
 
 else if (${ICE_MACHINE} =~ onyx*) then

@@ -89,7 +89,6 @@
       integer (kind=int_kind) :: nml_error ! namelist i/o error flag
       real    (kind=dbl_kind) :: secday
       logical (kind=log_kind) :: tr_lvl
-      character(len=char_len_long) :: tmpstr2 ! for namelist errors
 
       character(len=*), parameter :: subname = '(init_hist_mechred_2D)'
 

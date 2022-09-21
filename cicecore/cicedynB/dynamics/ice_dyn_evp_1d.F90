@@ -132,7 +132,8 @@ contains
       use ice_kinds_mod
       use ice_constants, only : p027, p055, p111, p166, p222, p25, &
           p333, p5, c1p5, c1
-      use ice_dyn_shared, only : ecci, denom1, arlx1i, Ktens, revp
+      use ice_dyn_shared, only : ecci, denom1, arlx1i, Ktens, revp, &
+          deltaminEVP
 
       implicit none
 
@@ -152,7 +153,7 @@ contains
       ! local variables
 
       integer(kind=int_kind) :: iw, il, iu
-      real(kind=dbl_kind) :: puny, divune, divunw, divuse, divusw, &
+      real(kind=dbl_kind) :: divune, divunw, divuse, divusw, &
          tensionne, tensionnw, tensionse, tensionsw, shearne, shearnw, &
          shearse, shearsw, Deltane, Deltanw, Deltase, Deltasw, c0ne, &
          c0nw, c0se, c0sw, c1ne, c1nw, c1se, c1sw, ssigpn, ssigps, &
@@ -163,16 +164,9 @@ contains
          csig12se, csig12sw, str12ew, str12we, str12ns, str12sn, &
          strp_tmp, strm_tmp, tmp_uvel_ee, tmp_vvel_se, tmp_vvel_ee, &
          tmp_vvel_ne, tmp_uvel_ne, tmp_uvel_se, dxhy, dyhx, cxp, cyp, &
-         cxm, cym, tinyarea,tmparea
+         cxm, cym, tmparea, DminTarea
 
       character(len=*), parameter :: subname = '(stress_iter)'
-
-      call icepack_query_parameters(puny_out=puny)
-      call icepack_warnings_flush(nu_diag)
-      if (icepack_warnings_aborted()) then
-         call abort_ice(error_message=subname, file=__FILE__, &
-            line=__LINE__)
-      end if
 
 #ifdef _OPENACC
       !$acc parallel &
@@ -190,14 +184,14 @@ contains
 
          if (skiptcell(iw)) cycle
 
-         tmparea = dxt(iw) * dyt(iw) ! necessary to split calc of tinyarea. Otherwize not binary identical
-         tinyarea =  puny * tmparea
-         dxhy     = p5 * (hte(iw) - htem1(iw))
-         dyhx     = p5 * (htn(iw) - htnm1(iw))
-         cxp      = c1p5 * htn(iw) - p5 * htnm1(iw)
-         cyp      = c1p5 * hte(iw) - p5 * htem1(iw)
-         cxm      = -(c1p5 * htnm1(iw) - p5 * htn(iw))
-         cym      = -(c1p5 * htem1(iw) - p5 * hte(iw))
+         tmparea = dxt(iw) * dyt(iw) ! necessary to split calc of DminTarea. Otherwize not binary identical
+         DminTarea =  deltaminEVP * tmparea
+         dxhy      = p5 * (hte(iw) - htem1(iw))
+         dyhx      = p5 * (htn(iw) - htnm1(iw))
+         cxp       = c1p5 * htn(iw) - p5 * htnm1(iw)
+         cyp       = c1p5 * hte(iw) - p5 * htem1(iw)
+         cxm       = -(c1p5 * htnm1(iw) - p5 * htn(iw))
+         cym       = -(c1p5 * htem1(iw) - p5 * hte(iw))
 
          !--------------------------------------------------------------
          ! strain rates
@@ -252,10 +246,10 @@ contains
          ! save replacement pressure for principal stress calculation
          !--------------------------------------------------------------
 
-         c0ne = strength(iw) / max(Deltane, tinyarea)
-         c0nw = strength(iw) / max(Deltanw, tinyarea)
-         c0sw = strength(iw) / max(Deltasw, tinyarea)
-         c0se = strength(iw) / max(Deltase, tinyarea)
+         c0ne = strength(iw) / max(Deltane, DminTarea)
+         c0nw = strength(iw) / max(Deltanw, DminTarea)
+         c0sw = strength(iw) / max(Deltasw, DminTarea)
+         c0se = strength(iw) / max(Deltase, DminTarea)
 
          c1ne = c0ne * arlx1i
          c1nw = c0nw * arlx1i
@@ -408,7 +402,8 @@ contains
       use ice_kinds_mod
       use ice_constants, only : p027, p055, p111, p166, p222, p25, &
           p333, p5, c1p5, c1, c0
-      use ice_dyn_shared, only : ecci, denom1, arlx1i, Ktens, revp
+      use ice_dyn_shared, only : ecci, denom1, arlx1i, Ktens, revp,&
+          deltaminEVP
 
       implicit none
 
@@ -429,7 +424,7 @@ contains
       ! local variables
 
       integer(kind=int_kind) :: iw, il, iu
-      real(kind=dbl_kind) :: puny, divune, divunw, divuse, divusw, &
+      real(kind=dbl_kind) :: divune, divunw, divuse, divusw, &
          tensionne, tensionnw, tensionse, tensionsw, shearne, shearnw, &
          shearse, shearsw, Deltane, Deltanw, Deltase, Deltasw, c0ne, &
          c0nw, c0se, c0sw, c1ne, c1nw, c1se, c1sw, ssigpn, ssigps, &
@@ -440,16 +435,9 @@ contains
          csig12se, csig12sw, str12ew, str12we, str12ns, str12sn, &
          strp_tmp, strm_tmp, tmp_uvel_ee, tmp_vvel_se, tmp_vvel_ee, &
          tmp_vvel_ne, tmp_uvel_ne, tmp_uvel_se, dxhy, dyhx, cxp, cyp, &
-         cxm, cym, tinyarea, tmparea
+         cxm, cym, tmparea, DminTarea
 
       character(len=*), parameter :: subname = '(stress_last)'
-
-      call icepack_query_parameters(puny_out=puny)
-      call icepack_warnings_flush(nu_diag)
-      if (icepack_warnings_aborted()) then
-         call abort_ice(error_message=subname, file=__FILE__, &
-            line=__LINE__)
-      end if
 
 #ifdef _OPENACC
       !$acc parallel &
@@ -468,14 +456,14 @@ contains
 
          if (skiptcell(iw)) cycle
 
-         tmparea = dxt(iw) * dyt(iw) ! necessary to split calc of tinyarea. Otherwize not binary identical
-         tinyarea = puny * tmparea
-         dxhy     = p5 * (hte(iw) - htem1(iw))
-         dyhx     = p5 * (htn(iw) - htnm1(iw))
-         cxp      = c1p5 * htn(iw) - p5 * htnm1(iw)
-         cyp      = c1p5 * hte(iw) - p5 * htem1(iw)
-         cxm      = -(c1p5 * htnm1(iw) - p5 * htn(iw))
-         cym      = -(c1p5 * htem1(iw) - p5 * hte(iw))
+         tmparea = dxt(iw) * dyt(iw) ! necessary to split calc of DminTarea. Otherwize not binary identical
+         DminTarea = deltaminEVP * tmparea
+         dxhy      = p5 * (hte(iw) - htem1(iw))
+         dyhx      = p5 * (htn(iw) - htnm1(iw))
+         cxp       = c1p5 * htn(iw) - p5 * htnm1(iw)
+         cyp       = c1p5 * hte(iw) - p5 * htem1(iw)
+         cxm       = -(c1p5 * htnm1(iw) - p5 * htn(iw))
+         cym       = -(c1p5 * htem1(iw) - p5 * hte(iw))
 
          !--------------------------------------------------------------
          ! strain rates
@@ -545,10 +533,10 @@ contains
          ! save replacement pressure for principal stress calculation
          !--------------------------------------------------------------
 
-         c0ne = strength(iw) / max(Deltane, tinyarea)
-         c0nw = strength(iw) / max(Deltanw, tinyarea)
-         c0sw = strength(iw) / max(Deltasw, tinyarea)
-         c0se = strength(iw) / max(Deltase, tinyarea)
+         c0ne = strength(iw) / max(Deltane, DminTarea)
+         c0nw = strength(iw) / max(Deltanw, DminTarea)
+         c0sw = strength(iw) / max(Deltasw, DminTarea)
+         c0se = strength(iw) / max(Deltase, DminTarea)
 
          c1ne = c0ne * arlx1i
          c1nw = c0nw * arlx1i
@@ -869,10 +857,8 @@ contains
          vvel(iw) = (cca * cc2 - ccb * cc1) / ab2
 
          ! calculate seabed stress component for outputs
-         if (seabed_stress) then
-            taubx(iw) = -uvel(iw) * Tbu(iw) / (sqrt(uold**2 + vold**2) + u0)
-            tauby(iw) = -vvel(iw) * Tbu(iw) / (sqrt(uold**2 + vold**2) + u0)
-         end if
+         taubx(iw) = -uvel(iw) * Tbu(iw) / (sqrt(uold**2 + vold**2) + u0)
+         tauby(iw) = -vvel(iw) * Tbu(iw) / (sqrt(uold**2 + vold**2) + u0)
 
       end do
 #ifdef _OPENACC
@@ -1306,7 +1292,10 @@ contains
          if (ndte < 2) call abort_ice(subname &
             // ' ERROR: ndte must be 2 or higher for this kernel')
 
-         !$OMP PARALLEL PRIVATE(ksub)
+         ! tcraig, turn off the OMP directives here, Jan, 2022
+         ! This produces non bit-for-bit results with different thread counts.
+         ! Seems like there isn't an opportunity for safe threading here ???
+         !$XXXOMP PARALLEL PRIVATE(ksub)
          do ksub = 1, ndte - 1
             call evp1d_stress(NA_len, ee, ne, se, 1, NA_len, uvel, &
                vvel, dxt, dyt, hte, htn, htem1, htnm1, strength, &
@@ -1314,15 +1303,15 @@ contains
                stressm_2, stressm_3, stressm_4, stress12_1, &
                stress12_2, stress12_3, stress12_4, str1, str2, str3, &
                str4, str5, str6, str7, str8, skiptcell)
-            !$OMP BARRIER
+            !$XXXOMP BARRIER
             call evp1d_stepu(NA_len, rhow, 1, NA_len, cdn_ocn, aiu, &
                uocn, vocn, forcex, forcey, umassdti, fm, uarear, Tbu, &
                uvel_init, vvel_init, uvel, vvel, str1, str2, str3, &
                str4, str5, str6, str7, str8, nw, sw, sse, skipucell)
-            !$OMP BARRIER
+            !$XXXOMP BARRIER
             call evp1d_halo_update(NAVEL_len, 1, NA_len, uvel, vvel, &
                halo_parent)
-            !$OMP BARRIER
+            !$XXXOMP BARRIER
          end do
 
          call evp1d_stress(NA_len, ee, ne, se, 1, NA_len, uvel, vvel, &
@@ -1331,16 +1320,16 @@ contains
             stressm_3, stressm_4, stress12_1, stress12_2, stress12_3, &
             stress12_4, str1, str2, str3, str4, str5, str6, str7, &
             str8, skiptcell, tarear, divu, rdg_conv, rdg_shear, shear)
-         !$OMP BARRIER
+         !$XXXOMP BARRIER
          call evp1d_stepu(NA_len, rhow, 1, NA_len, cdn_ocn, aiu, uocn, &
             vocn, forcex, forcey, umassdti, fm, uarear, Tbu, &
             uvel_init, vvel_init, uvel, vvel, str1, str2, str3, str4, &
             str5, str6, str7, str8, nw, sw, sse, skipucell, strintx, &
             strinty, taubx, tauby)
-         !$OMP BARRIER
+         !$XXXOMP BARRIER
          call evp1d_halo_update(NAVEL_len, 1, NA_len, uvel, vvel, &
             halo_parent)
-         !$OMP END PARALLEL
+         !$XXXOMP END PARALLEL
 
       end if  ! master task
 

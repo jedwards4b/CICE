@@ -68,7 +68,6 @@
       integer (kind=int_kind) :: ns
       integer (kind=int_kind) :: nml_error ! namelist i/o error flag
       logical (kind=log_kind) :: formdrag
-      character(len=char_len_long) :: tmpstr2 ! for namelist errors
 
       character(len=*), parameter :: subname = '(init_hist_drag_2D)'
 

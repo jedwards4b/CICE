@@ -73,8 +73,7 @@
       integer (kind=int_kind) :: ns
       integer (kind=int_kind) :: nml_error ! namelist i/o error flag
       logical (kind=log_kind) :: tr_pond
-      character(len=char_len_long) :: tmpstr2 ! for namelist errors
-      
+
       character(len=*), parameter :: subname = '(init_hist_pond_2D)'
 
       call icepack_query_tracer_flags(tr_pond_out=tr_pond)

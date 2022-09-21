@@ -283,7 +283,6 @@
           tr_bgc_DON,    tr_bgc_Fe,    tr_bgc_hum,   &
           skl_bgc, solve_zsal, z_tracers
 
-      character(len=char_len_long) :: tmpstr2 ! for namelist errors
       character(len=*), parameter  :: subname = '(init_hist_bgc_2D)'
 
       call icepack_query_parameters(skl_bgc_out=skl_bgc, &

@@ -1070,7 +1070,6 @@
          nml_error, & ! namelist i/o error flag
          abort_flag
 
-      character (len=char_len_long) :: tmpstr2
       character(len=*), parameter :: subname='(input_zbgc)'
 
       !-----------------------------------------------------------------

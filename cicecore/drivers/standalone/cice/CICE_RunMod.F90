@@ -15,11 +15,13 @@
       module CICE_RunMod
 
       use ice_kinds_mod
+      use ice_communicate, only: my_task, master_task
       use ice_fileunits, only: nu_diag
       use ice_arrays_column, only: oceanmixed_ice
       use ice_constants, only: c0, c1
       use ice_constants, only: field_loc_center, field_type_scalar
       use ice_exit, only: abort_ice
+      use ice_memusage, only: ice_memusage_print
       use icepack_intfc, only: icepack_warnings_flush, icepack_warnings_aborted
       use icepack_intfc, only: icepack_max_iso, icepack_max_aero
       use icepack_intfc, only: icepack_query_parameters
@@ -157,7 +159,7 @@
       use ice_restoring, only: restore_ice, ice_HaloRestore
       use ice_step_mod, only: prep_radiation, step_therm1, step_therm2, &
           update_state, step_dyn_horiz, step_dyn_ridge, step_radiation, &
-          biogeochemistry, save_init, step_dyn_wave, step_snow
+          biogeochemistry, step_prep, step_dyn_wave, step_snow
       use ice_timers, only: ice_timer_start, ice_timer_stop, &
           timer_diags, timer_column, timer_thermo, timer_bound, &
           timer_hist, timer_readwrite
@@ -216,12 +218,11 @@
          call ice_timer_start(timer_column)  ! column physics
          call ice_timer_start(timer_thermo)  ! thermodynamics
 
-         call save_init
+         call step_prep
 
-         !$OMP PARALLEL DO PRIVATE(iblk)
-         do iblk = 1, nblocks
-
-            if (ktherm >= 0) then
+         if (ktherm >= 0) then
+            !$OMP PARALLEL DO PRIVATE(iblk) SCHEDULE(runtime)
+            do iblk = 1, nblocks
 
       !-----------------------------------------------------------------
       ! scale radiation fields
@@ -237,7 +238,7 @@
       !-----------------------------------------------------------------
       ! thermodynamics and biogeochemistry
       !-----------------------------------------------------------------
-            
+
                call step_therm1     (dt, iblk) ! vertical thermodynamics
 
                if (debug_model) then
@@ -259,10 +260,9 @@
                   call debug_ice (iblk, plabeld)
                endif
 
-            endif ! ktherm > 0
-
-         enddo ! iblk
-         !$OMP END PARALLEL DO
+            enddo
+            !$OMP END PARALLEL DO
+         endif ! ktherm > 0
 
          ! clean up, update tendency diagnostics
          offset = dt
@@ -292,7 +292,7 @@
             endif
 
             ! ridging
-            !$OMP PARALLEL DO PRIVATE(iblk)
+            !$OMP PARALLEL DO PRIVATE(iblk) SCHEDULE(runtime)
             do iblk = 1, nblocks
                if (kridge > 0) call step_dyn_ridge (dt_dyn, ndtd, iblk)
             enddo
@@ -326,14 +326,15 @@
       !-----------------------------------------------------------------
 
          if (tr_snow) then         ! advanced snow physics
+            !$OMP PARALLEL DO PRIVATE(iblk) SCHEDULE(runtime)
             do iblk = 1, nblocks
                call step_snow (dt, iblk)
             enddo
+            !$OMP END PARALLEL DO
             call update_state (dt) ! clean up
          endif
 
-!MHRI: CHECK THIS OMP
-         !$OMP PARALLEL DO PRIVATE(iblk)
+         !$OMP PARALLEL DO PRIVATE(iblk) SCHEDULE(runtime)
          do iblk = 1, nblocks
 
       !-----------------------------------------------------------------
@@ -379,6 +380,9 @@
             if (solve_zsal) call zsal_diags
             if (skl_bgc .or. z_tracers)  call bgc_diags
             if (tr_brine) call hbrine_diags
+            if (my_task == master_task) then
+               call ice_memusage_print(nu_diag,subname)
+            endif
          endif
          call ice_timer_stop(timer_diags)   ! diagnostics
 
@@ -405,7 +409,6 @@
             if (kdyn == 2)    call write_restart_eap
             call final_restart
          endif
-
          call ice_timer_stop(timer_readwrite)  ! reading/writing
 
       end subroutine ice_step
@@ -488,7 +491,7 @@
          enddo
          enddo
 
-         call ice_timer_start(timer_couple)   ! atm/ocn coupling
+         call ice_timer_start(timer_couple,iblk)   ! atm/ocn coupling
 
          if (oceanmixed_ice) &
          call ocean_mixed_layer (dt,iblk) ! ocean surface fluxes and sst
@@ -655,7 +658,7 @@
          endif                 
 !echmod
 #endif
-         call ice_timer_stop(timer_couple)   ! atm/ocn coupling
+         call ice_timer_stop(timer_couple,iblk)   ! atm/ocn coupling
 
       end subroutine coupling_prep
 
