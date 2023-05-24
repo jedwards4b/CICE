@@ -639,9 +639,8 @@ contains
 
              tmplon = lon(n)
              if(tmplon < c0)tmplon = tmplon + c360
-
              ! error check differences between internally generated lons and those read in
-             diff_lon = abs(mod(lonMesh(n) - tmplon,360.0))
+             diff_lon = abs(mod(2*c360+lonMesh(n),c360) - mod(2*c360+tmplon,c360))
              if (diff_lon > eps_imesh ) then
                 write(6,100)n,lonMesh(n),tmplon, diff_lon
                 !call abort_ice(error_message=subname, file=__FILE__, line=__LINE__)
