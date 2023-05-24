@@ -583,7 +583,7 @@ contains
     real(dbl_kind)               :: diff_lon
     real(dbl_kind)               :: diff_lat
     real(dbl_kind)               :: rad_to_deg
-    real(dbl_kind)               :: tmplon, eps_imesh
+    real(dbl_kind)               :: eps_imesh
     logical                      :: isPresent, isSet
     logical                      :: mask_error
     integer                      :: mask_internal
@@ -637,12 +637,10 @@ contains
              lon(n) = tlon(i,j,iblk)*rad_to_deg
              lat(n) = tlat(i,j,iblk)*rad_to_deg
 
-             tmplon = lon(n)
-             if(tmplon < c0)tmplon = tmplon + c360
              ! error check differences between internally generated lons and those read in
-             diff_lon = abs(mod(2*c360+lonMesh(n),c360) - mod(2*c360+tmplon,c360))
+             diff_lon = abs(mod(2*c360+lonMesh(n),c360) - mod(2*c360+lon(n),c360))
              if (diff_lon > eps_imesh ) then
-                write(6,100)n,lonMesh(n),tmplon, diff_lon
+                write(6,100)n,lonMesh(n),lon(n), diff_lon
                 !call abort_ice(error_message=subname, file=__FILE__, line=__LINE__)
              end if
              diff_lat = abs(latMesh(n) - lat(n))
