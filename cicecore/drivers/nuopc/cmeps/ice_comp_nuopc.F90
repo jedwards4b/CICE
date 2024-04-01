@@ -1290,6 +1290,30 @@ contains
        call ESMF_LogWrite(subname//'setting alarms for ' // trim(name), ESMF_LOGMSG_INFO)
 
        !----------------
+       ! Stop alarm - must be set first, since restart alarm may be based on this value
+       !----------------
+       call NUOPC_CompAttributeGet(gcomp, name="stop_option", value=stop_option, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       call NUOPC_CompAttributeGet(gcomp, name="stop_n", value=cvalue, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       read(cvalue,*) stop_n
+
+       call NUOPC_CompAttributeGet(gcomp, name="stop_ymd", value=cvalue, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       read(cvalue,*) stop_ymd
+
+       call alarmInit(mclock, stop_alarm, stop_option, &
+            opt_n   = stop_n,           &
+            opt_ymd = stop_ymd,         &
+            RefTime = mcurrTime,           &
+            alarmname = 'alarm_stop', rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       call ESMF_AlarmSet(stop_alarm, clock=mclock, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       !----------------
        ! Restart alarm
        !----------------
        call NUOPC_CompAttributeGet(gcomp, name="restart_option", value=restart_option, rc=rc)
@@ -1311,30 +1335,6 @@ contains
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
        call ESMF_AlarmSet(restart_alarm, clock=mclock, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       !----------------
-       ! Stop alarm
-       !----------------
-       call NUOPC_CompAttributeGet(gcomp, name="stop_option", value=stop_option, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       call NUOPC_CompAttributeGet(gcomp, name="stop_n", value=cvalue, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       read(cvalue,*) stop_n
-
-       call NUOPC_CompAttributeGet(gcomp, name="stop_ymd", value=cvalue, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       read(cvalue,*) stop_ymd
-
-       call alarmInit(mclock, stop_alarm, stop_option, &
-            opt_n   = stop_n,           &
-            opt_ymd = stop_ymd,         &
-            RefTime = mcurrTime,           &
-            alarmname = 'alarm_stop', rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       call ESMF_AlarmSet(stop_alarm, clock=mclock, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
     end if
