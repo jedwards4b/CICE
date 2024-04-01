@@ -65,6 +65,7 @@ module ice_shr_methods
        optMonthly        = "monthly"   , &
        optYearly         = "yearly"    , &
        optDate           = "date"      , &
+       optEnd            = "end"       , &
        optIfdays0        = "ifdays0"
 
   ! Module data
@@ -756,6 +757,7 @@ contains
        update_nextalarm  = .true.
 
     case (optNStep)
+       ! This only works if ice_cpl_dt == minimum_timestep
        if (.not.present(opt_n)) call abort_ice(subname//trim(option)//' requires opt_n')
        if (opt_n <= 0)  call abort_ice(subname//trim(option)//' invalid opt_n')
        call ESMF_ClockGet(clock, TimeStep=AlarmInterval, rc=rc)
@@ -919,6 +921,13 @@ contains
        call ESMF_TimeSet( NextAlarm, yy=cyy, mm=1, dd=1, s=0, calendar=cal, rc=rc )
        if (chkerr(rc,__LINE__,u_FILE_u)) return
        update_nextalarm  = .true.
+
+    case (optEnd)
+       call ESMF_TimeIntervalSet(AlarmInterval, yy=9999, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       call ESMF_TimeSet( NextAlarm, yy=9999, mm=12, dd=1, s=0, calendar=cal, rc=rc )
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       update_nextalarm  = .false.
 
     case default
        call abort_ice(subname//'unknown option '//trim(option))
