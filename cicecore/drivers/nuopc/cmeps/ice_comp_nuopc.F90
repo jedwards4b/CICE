@@ -907,6 +907,12 @@ contains
        ! *******************
        ! *** RETURN HERE ***
        ! *******************
+       call State_SetScalar(dble(0), flds_scalar_index_nx, exportState, &
+            flds_scalar_name, flds_scalar_num, rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       call State_SetScalar(dble(0), flds_scalar_index_ny, exportState, &
+            flds_scalar_name, flds_scalar_num, rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
        RETURN
     else if(single_column) then
        write(nu_diag,'(a,3(f10.5,2x))')' (ice_comp_nuopc) single column mode lon/lat/frac is ',&
