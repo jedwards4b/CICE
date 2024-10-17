@@ -1139,6 +1139,7 @@ contains
     call ESMF_ClockGetAlarm(clock, alarmname='alarm_restart', alarm=alarm, rc=rc)
     if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
+    force_restart_now = .false.
     if (ESMF_AlarmIsRinging(alarm, rc=rc)) then
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
        force_restart_now = .true.
@@ -1153,7 +1154,15 @@ contains
        write(restart_date,"(i4.4,a,i2.2,a,i2.2,a,i5.5)") yy, '-', mm, '-',dd,'-',tod
        write(restart_filename,'(4a)') trim(restart_dir), trim(restart_file), '.', trim(restart_date)
     else
-       force_restart_now = .false.
+       call ESMF_ClockGetAlarm(clock, alarmname='alarm_stop', alarm=alarm, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       if (ESMF_AlarmIsRinging(alarm, rc=rc)) then
+          call NUOPC_CompAttributeGet(gcomp, name="write_restart_at_endofrun", value=cvalue, isPresent=isPresent, isSet=isSet, rc=rc)
+          if (ChkErr(rc,__LINE__,u_FILE_u)) return
+          if (isPresent .and. isSet) then
+             if (trim(cvalue) .eq. '.true.') force_restart_now = .true.
+          end if
+       endif
     endif
 
     !--------------------------------
@@ -1311,30 +1320,6 @@ contains
        call ESMF_LogWrite(subname//'setting alarms for ' // trim(name), ESMF_LOGMSG_INFO)
 
        !----------------
-       ! Restart alarm
-       !----------------
-       call NUOPC_CompAttributeGet(gcomp, name="restart_option", value=restart_option, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       call NUOPC_CompAttributeGet(gcomp, name="restart_n", value=cvalue, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       read(cvalue,*) restart_n
-
-       call NUOPC_CompAttributeGet(gcomp, name="restart_ymd", value=cvalue, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-       read(cvalue,*) restart_ymd
-
-       call alarmInit(mclock, restart_alarm, restart_option, &
-            opt_n   = restart_n,           &
-            opt_ymd = restart_ymd,         &
-            RefTime = mcurrTime,           &
-            alarmname = 'alarm_restart', rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       call ESMF_AlarmSet(restart_alarm, clock=mclock, rc=rc)
-       if (ChkErr(rc,__LINE__,u_FILE_u)) return
-
-       !----------------
        ! Stop alarm
        !----------------
        call NUOPC_CompAttributeGet(gcomp, name="stop_option", value=stop_option, rc=rc)
@@ -1356,6 +1341,30 @@ contains
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
        call ESMF_AlarmSet(stop_alarm, clock=mclock, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       !----------------
+       ! Restart alarm
+       !----------------
+       call NUOPC_CompAttributeGet(gcomp, name="restart_option", value=restart_option, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       call NUOPC_CompAttributeGet(gcomp, name="restart_n", value=cvalue, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       read(cvalue,*) restart_n
+
+       call NUOPC_CompAttributeGet(gcomp, name="restart_ymd", value=cvalue, rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+       read(cvalue,*) restart_ymd
+
+       call alarmInit(mclock, restart_alarm, restart_option, &
+            opt_n   = restart_n,           &
+            opt_ymd = restart_ymd,         &
+            RefTime = mcurrTime,           &
+            alarmname = 'alarm_restart', rc=rc)
+       if (ChkErr(rc,__LINE__,u_FILE_u)) return
+
+       call ESMF_AlarmSet(restart_alarm, clock=mclock, rc=rc)
        if (ChkErr(rc,__LINE__,u_FILE_u)) return
 
     end if
