@@ -215,6 +215,8 @@
                restart_dir(1:lenstr(restart_dir)), &
                restart_file(1:lenstr(restart_file)),'.', &
                myear,'-',mmonth,'-',mday,'-',msec
+         write(pointer_file,'(a,i4.4,a,i2.2,a,i2.2,a,i5.5)') &
+               'rpointer.ice.',myear,'-',mmonth,'-',mday,'-',msec
       end if
 
       if (restart_format(1:3) /= 'bin') filename = trim(filename) // '.nc'
