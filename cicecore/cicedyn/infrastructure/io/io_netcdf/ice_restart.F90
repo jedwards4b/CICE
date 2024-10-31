@@ -67,7 +67,7 @@
          filename = trim(ice_ic)
       else
          if (my_task == master_task) then
-            open(nu_rst_pointer,file=pointer_file)
+            open(nu_rst_pointer,file=pointer_file, status='old')
             read(nu_rst_pointer,'(a)') filename0
             filename = trim(filename0)
             close(nu_rst_pointer)
@@ -154,7 +154,7 @@
       logical (kind=log_kind) :: &
          skl_bgc, z_tracers, tr_fsd, &
          tr_iage, tr_FY, tr_lvl, tr_iso, tr_aero, &
-         tr_pond_topo, tr_pond_lvl, tr_pond_sealvl, tr_brine, tr_snow, &
+         tr_pond_topo, tr_pond_lvl, tr_brine, tr_snow, &
          tr_bgc_N, tr_bgc_C, tr_bgc_Nit, &
          tr_bgc_Sil, tr_bgc_DMS, &
          tr_bgc_chl, tr_bgc_Am,  &
@@ -190,7 +190,6 @@
          tr_iage_out=tr_iage, tr_FY_out=tr_FY, tr_lvl_out=tr_lvl, tr_fsd_out=tr_fsd, &
          tr_iso_out=tr_iso, tr_aero_out=tr_aero, &
          tr_pond_topo_out=tr_pond_topo, tr_pond_lvl_out=tr_pond_lvl, &
-         tr_pond_sealvl_out=tr_pond_sealvl, &
          tr_snow_out=tr_snow, tr_brine_out=tr_brine, &
          tr_bgc_N_out=tr_bgc_N, tr_bgc_C_out=tr_bgc_C, tr_bgc_Nit_out=tr_bgc_Nit, &
          tr_bgc_Sil_out=tr_bgc_Sil, tr_bgc_DMS_out=tr_bgc_DMS, &
@@ -358,7 +357,7 @@
             call define_rest_field(ncid,'a12_4',dims)
          endif
 
-         if (tr_pond_lvl .or. tr_pond_sealvl) then
+         if (tr_pond_lvl) then
             call define_rest_field(ncid,'fsnow',dims)
          endif
 
@@ -450,7 +449,7 @@
             call define_rest_field(ncid,'ipnd',dims)
          end if
 
-         if (tr_pond_lvl .or. tr_pond_sealvl) then
+         if (tr_pond_lvl) then
             call define_rest_field(ncid,'apnd',dims)
             call define_rest_field(ncid,'hpnd',dims)
             call define_rest_field(ncid,'ipnd',dims)
